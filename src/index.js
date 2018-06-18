@@ -19,12 +19,8 @@ const request = requestFactory({
   jar: true
 })
 
-const scalingoAuthEndpoint = 'https://auth.scalingo.com/v1/tokens/exchange'
+const scalingoAuthEndpoint = 'auth.scalingo.com/v1/tokens/exchange'
 const scalingoApiUrl = 'https://api.scalingo.com/v1'
-
-let scalingoRealToken = null
-
-const baseUrl = 'http://books.toscrape.com'
 
 module.exports = new BaseKonnector(start)
 
@@ -37,48 +33,36 @@ async function start(fields) {
   log('info', 'Successfully logged in')
   log('info', 'Fetching the list of invoices')
   let options = {
-    uri: 'https://api.scalingo.com/v1/account/invoices',
+    uri: `${scalingoApiUrl}/account/invoices`,
     headers: {
       'Authorization': `Bearer ${ bearerToken }`
     }
   }
   const response = await request(options)
-  log('info', response)
 
   log('info', 'Parsing list of invoices')
   const documents = await parseResponse(response.invoices)
 
-  // here we use the saveBills function even if what we fetch are not bills, but this is the most
-  // common case in connectors
   log('info', 'Saving data to Cozy')
   await saveBills(documents, fields.folderPath, {
-    // this is a bank identifier which will be used to link bills to bank operations. These
-    // identifiers should be at least a word found in the title of a bank operation related to this
-    // bill. It is not case sensitive.
-    identifiers: ['magic']
+    identifiers: ['MagicIT']
   })
 }
 
-// this shows authentication using the [signin function](https://github.com/konnectors/libs/blob/master/packages/cozy-konnector-libs/docs/api.md#module_signin)
-// even if this in another domain here, but it works as an example
 async function authenticate(token) {
-  let data = await request.post(`https://:${token}@auth.scalingo.com/v1/tokens/exchange`)
+  let data = await request.post(`https://:${token}@${scalingoAuthEndpoint}`)
   return data.token
 }
 
-// The goal of this function is to parse a html page wrapped by a cheerio instance
-// and return an array of js objects which will be saved to the cozy by saveBills (https://github.com/konnectors/libs/blob/master/packages/cozy-konnector-libs/docs/api.md#savebills)
 function parseResponse(invoices) {
-  // you can find documentation about the scrape function here :
-  // https://github.com/konnectors/libs/blob/master/packages/cozy-konnector-libs/docs/api.md#scrape
   return invoices.map(invoice => ({
     title: invoice.invoice_number,
     amount: invoice.total_price_with_vat,
     fileurl: invoice.pdf_url,
     filename: `${ invoice.billing_month }.pdf`,
     date: invoice.billing_month,
-    currency: '€',
-    vendor: 'template',
+    currency: 'EUR',
+    vendor: 'Scalingo',
     metadata: {
       // it can be interesting that we add the date of import. This is not mandatory but may be
       // usefull for debugging or data migration
@@ -87,9 +71,4 @@ function parseResponse(invoices) {
       version: 1
     }
   }))
-}
-
-// convert a price string to a float
-function normalizePrice(price) {
-  return parseFloat(price.replace('£', '').trim())
 }
