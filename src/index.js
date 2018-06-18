@@ -1,8 +1,6 @@
 const {
   BaseKonnector,
   requestFactory,
-  signin,
-  scrape,
   saveBills,
   log
 } = require('cozy-konnector-libs')
@@ -35,7 +33,7 @@ async function start(fields) {
   let options = {
     uri: `${scalingoApiUrl}/account/invoices`,
     headers: {
-      'Authorization': `Bearer ${ bearerToken }`
+      Authorization: `Bearer ${bearerToken}`
     }
   }
   const response = await request(options)
@@ -59,7 +57,7 @@ function parseResponse(invoices) {
     title: invoice.invoice_number,
     amount: invoice.total_price_with_vat,
     fileurl: invoice.pdf_url,
-    filename: `${ invoice.billing_month }.pdf`,
+    filename: `${invoice.billing_month}.pdf`,
     date: invoice.billing_month,
     currency: 'EUR',
     vendor: 'Scalingo',
