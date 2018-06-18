@@ -11,13 +11,18 @@ const request = requestFactory({
   // debugging but very verbose. That is why it is commented out by default
   // debug: true,
   // activates [cheerio](https://cheerio.js.org/) parsing on each page
-  cheerio: true,
+  cheerio: false,
   // If cheerio is activated do not forget to deactivate json parsing (which is activated by
   // default in cozy-konnector-libs
-  json: false,
+  json: true,
   // this allows request-promise to keep cookies between requests
   jar: true
 })
+
+const scalingoAuthEndpoint = 'https://auth.scalingo.com/v1/tokens/exchange'
+const scalingoApiUrl = 'https://api.scalingo.com/v1'
+
+let scalingoRealToken = null
 
 const baseUrl = 'http://books.toscrape.com'
 
@@ -28,14 +33,20 @@ module.exports = new BaseKonnector(start)
 // the account information come from ./konnector-dev-config.json file
 async function start(fields) {
   log('info', 'Authenticating ...')
-  await authenticate(fields.login, fields.password)
+  let bearerToken = await authenticate(fields.token)
   log('info', 'Successfully logged in')
-  // The BaseKonnector instance expects a Promise as return of the function
-  log('info', 'Fetching the list of documents')
-  const $ = await request(`${baseUrl}/index.html`)
-  // cheerio (https://cheerio.js.org/) uses the same api as jQuery (http://jquery.com/)
-  log('info', 'Parsing list of documents')
-  const documents = await parseDocuments($)
+  log('info', 'Fetching the list of invoices')
+  let options = {
+    uri: 'https://api.scalingo.com/v1/account/invoices',
+    headers: {
+      'Authorization': `Bearer ${ bearerToken }`
+    }
+  }
+  const response = await request(options)
+  log('info', response)
+
+  log('info', 'Parsing list of invoices')
+  const documents = await parseResponse(response.invoices)
 
   // here we use the saveBills function even if what we fetch are not bills, but this is the most
   // common case in connectors
@@ -44,66 +55,28 @@ async function start(fields) {
     // this is a bank identifier which will be used to link bills to bank operations. These
     // identifiers should be at least a word found in the title of a bank operation related to this
     // bill. It is not case sensitive.
-    identifiers: ['books']
+    identifiers: ['magic']
   })
 }
 
 // this shows authentication using the [signin function](https://github.com/konnectors/libs/blob/master/packages/cozy-konnector-libs/docs/api.md#module_signin)
 // even if this in another domain here, but it works as an example
-function authenticate(username, password) {
-  return signin({
-    url: `http://quotes.toscrape.com/login`,
-    formSelector: 'form',
-    formData: { username, password },
-    // the validate function will check if
-    validate: (statusCode, $) => {
-      // The login in toscrape.com always works excepted when no password is set
-      if ($(`a[href='/logout']`).length === 1) {
-        return true
-      } else {
-        // cozy-konnector-libs has its own logging function which format these logs with colors in
-        // standalone and dev mode and as JSON in production mode
-        log('error', $('.error').text())
-        return false
-      }
-    }
-  })
+async function authenticate(token) {
+  let data = await request.post(`https://:${token}@auth.scalingo.com/v1/tokens/exchange`)
+  return data.token
 }
 
 // The goal of this function is to parse a html page wrapped by a cheerio instance
 // and return an array of js objects which will be saved to the cozy by saveBills (https://github.com/konnectors/libs/blob/master/packages/cozy-konnector-libs/docs/api.md#savebills)
-function parseDocuments($) {
+function parseResponse(invoices) {
   // you can find documentation about the scrape function here :
   // https://github.com/konnectors/libs/blob/master/packages/cozy-konnector-libs/docs/api.md#scrape
-  const docs = scrape(
-    $,
-    {
-      title: {
-        sel: 'h3 a',
-        attr: 'title'
-      },
-      amount: {
-        sel: '.price_color',
-        parse: normalizePrice
-      },
-      fileurl: {
-        sel: 'img',
-        attr: 'src',
-        parse: src => `${baseUrl}/${src}`
-      },
-      filename: {
-        sel: 'h3 a',
-        attr: 'title',
-        parse: title => `${title}.jpg`
-      }
-    },
-    'article'
-  )
-  return docs.map(doc => ({
-    ...doc,
-    // the saveBills function needs a date field
-    // even if it is a little artificial here (these are not real bills)
-    date: new Date(),
+  return invoices.map(invoice => ({
+    title: invoice.invoice_number,
+    amount: invoice.total_price_with_vat,
+    fileurl: invoice.pdf_url,
+    filename: `${ invoice.billing_month }.pdf`,
+    date: invoice.billing_month,
     currency: '€',
     vendor: 'template',
     metadata: {
