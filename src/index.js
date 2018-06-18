@@ -48,8 +48,12 @@ async function start(fields) {
 }
 
 async function authenticate(token) {
-  let data = await request.post(`https://:${token}@${scalingoAuthEndpoint}`)
-  return data.token
+  try {
+    let data = await request.post(`https://:${token}@${scalingoAuthEndpoint}`)
+    return data.token
+  } catch (e) {
+    log('error', e)
+  }
 }
 
 function parseResponse(invoices) {
