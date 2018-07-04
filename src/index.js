@@ -1,3 +1,7 @@
+process.env.SENTRY_DNS =
+  process.env.SENTRY_DNS ||
+  'https://e893738ebf4748bf9f8b7e1489455257:4a3c8ba5588943b69bad03f07bd305b7@sentry.cozycloud.cc/79'
+
 const {
   BaseKonnector,
   requestFactory,
