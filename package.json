@@ -1,10 +1,10 @@
 {
   "name": "cozy-konnector-scalingo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Scalingo/scalingo.git"
+    "url": "git+https://github.com/konnectors/scalingo.git"
   },
   "keywords": [],
   "author": "Scalingo",
