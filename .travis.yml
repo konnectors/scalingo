@@ -1,0 +1,40 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/scalingo.git"
+  - secure: j2FbrClubE8ObwkfvUAhVwh64FWmkC2vsetcQLrnAYp8AQG+ZOhxDB9eBPfZcATPSqbhCfsOA/PDVds+cq4oH5vOdKZkyDhQ2dMYBusnAfb2P91lvrHF4ox9PdVlMr6f0z00RhoSR+0qlBu1KrdGcWR0khI40Kmiq4V206Fnw+BnbNvTS63ibrJdMSwtKZttIWlGMh8EHCATazysQvV3UM7D9pkcfcF/N8DnkPngu9x5bS2moemfl1TObAmwfpS0LzVFbqqeOfNpf56ibHZxoTZtzHAg6HYgv8vgJEPVRzEThb+XD5l+Sd8/I3SO6IPvUcKW+SW4TF1aFDyFNvTJayIB1m6j4KznF25u5xugUH6vsliPTGdNCehToZWem8gRVvt1yBtDRTwCjwoTk95aCzAxVKfb1yifZKjMBVGqOHGd62aVs/H8fNvEiUpWxr1T2aT1VkEoOVIvpgHdhJMOSs+ndLLDSi/3RHLjL+DPyFg0A3yZ95A3NqVJJfim75XJwFt3zuque08x9NgX6AIIx4TsBfX26B0Y5gTZJ124eX49lnj2PuKrDR/QGhF+gBRVcTOojaespWnhBegRsxDsEuMlNeYQuw5wO7XpbQC3t6FvLMkxYUXMG8Pb32uew34Y0+9P8HbQgLzEDY8p1zHYKT+pXmUti2lMFHhZWI3Uu7k=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - latest
+script:
+- yarn lint
+- yarn build
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_8fa1155864b8_key -iv $encrypted_8fa1155864b8_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D
