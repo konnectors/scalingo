@@ -92,5 +92,6 @@
       }
     }
   },
+  "banksTransactionRegExp": "\\bMagicIT\\b",
   "manifest_version": "2"
 }
