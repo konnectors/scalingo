@@ -5,7 +5,7 @@
   "language": "node",
   "icon": "icon.jpg",
   "slug": "scalingo",
-  "source": "git://github.com/konnectors/scalingo.git",
+  "source": "git@github.com:konnectors/scalingo.git",
   "editor": "Scalingo",
   "vendor_link": "https://scalingo.com/",
   "categories": ["online_services"],
