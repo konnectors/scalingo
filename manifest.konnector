@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": "Scalingo",
   "type": "konnector",
   "language": "node",
@@ -8,7 +8,9 @@
   "source": "git://github.com/konnectors/scalingo.git",
   "editor": "Scalingo",
   "vendor_link": "https://scalingo.com/",
-  "categories": ["online_services"],
+  "categories": [
+    "online_services"
+  ],
   "fields": {
     "login": {
       "type": "text"
@@ -39,14 +41,19 @@
     },
     "accounts": {
       "type": "io.cozy.accounts",
-      "verbs": ["GET"]
+      "verbs": [
+        "GET"
+      ]
     }
   },
   "developer": {
     "name": "Yann Klis",
     "url": "https://github.com/yannski"
   },
-  "langs": ["fr", "en"],
+  "langs": [
+    "fr",
+    "en"
+  ],
   "locales": {
     "fr": {
       "short_description": "Connecteur Scalingo",
