@@ -6,7 +6,7 @@ env:
   - GH_USER_EMAIL="travis@example.org"
   - GH_USER_NAME="cozy-bot"
   - DEPLOY_REPOSITORY="git@github.com:konnectors/scalingo.git"
-  - secure: hc6wFAyKK/ykfl7APTM7DBmW8na2SvqqWljwlIJR6QlYAZJKjn+vQQAfzyYwLL0GMs0uoV5pRyRdS2gCP6D9MOrXDxeMRO1pd/OT2LyIQ2PY0xQyBTcdwvYycBA4DQlxfsGyFx2VkeWKq086/JfyiMAkgWgjMtKha6l++OOrV55FEunVWEZx65TxN0I91gFVS1aDeSM0OVoTccF3Ue2xp+DVNOsX8WwRUL2XqM1+c3ki1VPJDWJoCEPY2MzcTBx/8D0/F0ejT7I7tUz/a8HVnkNXm55pFOBzgBe8vUfViNOCqWYvKoCdLar3XjSK4VT7wD0xC297zfhQwS6NI+evIZtOohf420wVHv/AZ8Xi1Xnl8zgByibFH4P76p76iUYCpsPkQZwjPm674GdQ9A1jb5asYtqRMnrt4ylZiPJbgkWsalE19kQ1vHdD9AZdgGMVUY19iUR6shZ+lCTnTqHWeINIngPvXbA2rev0uhm+9VZ8urFEV6tblnzCMwR2P/sDvDQHgBOBhHQ9/UKyablLlI/wqmLj+k6pgG05WXD2c3jA75eDJui7ZdXqR/0saf0wMT6q9iGCqAAx+SPds6lherFFLt41q1MWAHwDZEQeHstx1KfyYJYVZtO/0rFVRc2Fxd7hSQV2mFyIxdGfqXf5ZLyvQNpSGJEwfKAf4Fl1ALo=
+  - secure: TT+PGPfKgVlXb/wKFEsk1d0rE94gAPPzy3VSX+n57Ws3serLZaG9CzZz5DJCBuaJAQv5R3bCDX2Kn3sv2RRlIUcDReH2ajmvkcueSrLUPK51iIAk/1YfboMHJ75JfoklmdXkcoUZisTasoJuMVU9qO1Hl6Q48NxFI4jnAZr+Kn3CBttYtW23xsSojyfOL3/jLB6LPlCe9WvtDhGw6ZXoD4NGs8859LPVn9EePe1T01kd6KF4sHx9Cfbql7EqXxIuj+PaRNSIpa0+rUeWOgj8Qe6brb7uU46lfQrW7q3R3KVotx+LnzpcgR9AqkHH7pqITEpZWKCrhg38BUedDS5jTDa5YxSK6cAMg/d0pz1fNRhkskBZbAtETFi1o+OPY/DtJqeG+4EoaofZmwDtdGOA9jHgGdIYF59FAYLqbN51Y0WX0p2VEnLjVSF2HtDUhXYpRA+lgzXdbbq95BgGLW1c22XEXky6jcaThtZJSKfcxIoEGZ4UV+/4RiH0W8jNefbkHPUygXvqb+7gwhmebFw25eIbwFqKVOZ14AJwbhlV1/43x3jbazqbX68dPP8WsnHf18CZi6jc+7c694mh1AFeawdq+AnJhg8X8JFt1ElT+mOfhsTMe8ecN5wg9ZQyY/Bruq/3O3Ei68QpANz+nOgQ8YMcYMBZ8PumEF5bNTnbUlQ=
 cache:
   yarn: true
   directories:
@@ -14,10 +14,11 @@ cache:
 branches:
   except:
   - build
-  - latest
+  - build-debug
 script:
 - yarn lint
 - yarn build
+- yarn run check
 deploy:
 - provider: script
   skip-cleanup: true
@@ -30,7 +31,7 @@ deploy:
   on:
     tags: true
 before_install:
-- openssl aes-256-cbc -K $encrypted_8fa1155864b8_key -iv $encrypted_8fa1155864b8_iv
+- openssl aes-256-cbc -K $encrypted_b4e5492af9dc_key -iv $encrypted_b4e5492af9dc_iv
   -in github_deploy_key.enc -out /tmp/github_deploy_key -d
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/github_deploy_key
