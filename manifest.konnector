@@ -3,7 +3,7 @@
   "name": "Scalingo",
   "type": "konnector",
   "language": "node",
-  "icon": "icon.jpg",
+  "icon": "icon.svg",
   "slug": "scalingo",
   "source": "git@github.com:konnectors/scalingo.git",
   "editor": "Scalingo",
