@@ -8,7 +8,7 @@
   "source": "git@github.com:konnectors/scalingo.git",
   "editor": "Scalingo",
   "vendor_link": "https://scalingo.com/",
-  "categories": ["online_services"],
+  "categories": ["tech"],
   "fields": {
     "login": {
       "type": "text"
